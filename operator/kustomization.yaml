@@ -1,0 +1,6 @@
+namespace: default
+
+resources:
+- catalogsource.yaml
+- operatorgroup.yaml
+- subscription.yaml
