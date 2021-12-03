@@ -6,7 +6,7 @@ metadata:
   name: multicluster-hub-operator-subscription
 spec:
   channel: release-2.3
-  installPlanApproval: Manual
+  installPlanApproval: Automatic
   name: advanced-cluster-management
   source: multiclusterhub-catalog
   sourceNamespace: default
