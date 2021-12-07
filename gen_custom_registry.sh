@@ -153,7 +153,7 @@ mkdir "etc"
 touch "etc/nsswitch.conf"
 chmod a+r "etc/nsswitch.conf"
 
-buildah bud -t "$catalog_image_ref" -f dockerfile.index \
+buildah bud -t "$catalog_image_ref" -f Dockerfile.index \
    --build-arg "opm_vers=$opm_vers" .
 if [[ $? -ne 0 ]]; then
    >&2 echo "Error: Could not build custom catalog image $catalog_image_ref."
