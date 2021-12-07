@@ -8,7 +8,7 @@ spec:
   displayName: MultiCluster Hub
   publisher: Red Hat
   sourceType: grpc
-  image: ""
+  image: quay.io/cameronmwall/catalog-rep:downstream-n
   updateStrategy:
     registryPoll:
       interval: 10m
