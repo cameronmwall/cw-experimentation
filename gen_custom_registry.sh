@@ -87,13 +87,13 @@ catalog_image_rgy=${catalog_image_ref%%/*}
 login_to_image_rgy="$catalog_image_rgy"
 
 # Clean up any image from previous iteration
-old_images=$(buildah images --format "{{.Repository}}:{{.Tag}}" "$catalog_image_name")
+old_images=$(podman images --format "{{.Repository}}:{{.Tag}}" "$catalog_image_name")
 for img in $old_images; do
-   buildah rmi "$img" > /dev/null
+   podman rmi "$img" > /dev/null
 done
 
 if [[ -n $DOCKER_USER ]]; then
-   buildah login "$login_to_image_rgy"
+   podman login "$login_to_image_rgy"
    if [[ $? -ne 0 ]]; then
       >&2 echo "Error: Coud not login to image registry $login_to_image_rgy."
       exit 2
@@ -153,7 +153,7 @@ mkdir "etc"
 touch "etc/nsswitch.conf"
 chmod a+r "etc/nsswitch.conf"
 
-buildah bud -t "$catalog_image_ref" -f Dockerfile.index \
+podman build -t "$catalog_image_ref" -f Dockerfile.index \
    --build-arg "opm_vers=$opm_vers" .
 if [[ $? -ne 0 ]]; then
    >&2 echo "Error: Could not build custom catalog image $catalog_image_ref."
@@ -162,7 +162,7 @@ fi
 cd $old_cwd
 
 # Maybe a little heavy handed.  Should look for <none>-tagged images only?
-buildah image prune -f 2> /dev/null
+podman image prune -f 2> /dev/null
 if [[ $? -ne 0 ]]; then
    # If that failed, it could be we're actually running podman with the docker-compatibility
    # wrappers at a version that doesn't like -f or --force at all.  Try again running ppodman
@@ -171,7 +171,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 if [[ $push_the_image -eq 1 ]]; then
-   buildah push "$catalog_image_ref"
+   podman push "$catalog_image_ref"
    if [[ $? -ne 0 ]]; then
       >&2 echo "Error: Could not push custom catalog image $catalog_image_ref."
       exit 2
