@@ -68,7 +68,7 @@ echo $second_tag
 
 ./gen_custom_registry.sh -B quay.io/acm-d/acm-operator-bundle:$first_tag -B quay.io/acm-d/acm-operator-bundle:$second_tag -n quay.io/cameronmwall/catalog-rep -t $catalogTag
 
-podman push quay.io/cameronmwall/catalog-rep:$catalogTag
+sudo podman push quay.io/cameronmwall/catalog-rep:$catalogTag
 
 fi
 

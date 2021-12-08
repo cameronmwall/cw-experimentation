@@ -171,7 +171,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 if [[ $push_the_image -eq 1 ]]; then
-   podman push "$catalog_image_ref"
+   sudo podman push "$catalog_image_ref"
    if [[ $? -ne 0 ]]; then
       >&2 echo "Error: Could not push custom catalog image $catalog_image_ref."
       exit 2
