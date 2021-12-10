@@ -1,0 +1,98 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: install-upgrade
+  namespace: default
+spec:
+  params:
+  - name: lowerVersion
+    default: "2.3"
+    description: The version of the initial install
+    type: string
+  - name: higherVersion
+    default: "2.4"
+    description: The version to which to up.
+    type: string
+  - name: repo
+    default: DOWNSTREAM
+    description: UPSTREAM or DOWNSTREAM
+    type: string
+  - name: tag
+    default: pipelineTest
+    description: Image tag for the custom catalog
+    type: string
+  - name: destinationRepo
+    default: quay.io/cameronmwall/catalog-rep
+    description: The quay repo where the created catalog is placed
+    type: string
+  - name: token
+    default: default
+    description: Quay access token
+    type: string
+  tasks:
+  - name: fetch-repository
+    params:
+    - name: url
+      value: https://github.com/cameronmwall/cw-experimentation.git
+    - name: revision
+      value: upgrade-pipeline
+    - name: deleteExisting
+      value: "true"
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+  - name: create-image
+    params:
+    - name: lowerVersion
+      value: $(params.lowerVersion)
+    - name: higherVersion
+      value: $(params.higherVersion)
+    - name: repo
+      value: $(params.repo)
+    - name: tag
+      value: $(params.tag)
+    - name: destinationRepo
+      value: $(params.destinationRepo)
+    - name: token
+      value: $(params.token)
+    runAfter:
+    - fetch-repository
+    taskRef:
+      kind: Task
+      name: create-image
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+  - name: initial-install
+    params:
+    - name: lowerVersion
+      value: $(params.lowerVersion)
+    - name: destinationRepo
+      value: $(params.destinationRepo)
+    - name: tag
+      value: $(params.tag)
+    runAfter:
+    - create-image
+    taskRef:
+      kind: Task
+      name: initial-install
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+  - name: upgrade
+    params:
+    - name: higherVersion
+      value: $(params.higherVersion)
+    runAfter:
+    - initial-install
+    taskRef:
+      kind: Task
+      name: upgrade
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+  workspaces:
+  - name: shared-workspace

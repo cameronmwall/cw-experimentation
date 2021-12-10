@@ -1,0 +1,51 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: create-image
+  namespace: default
+spec:
+  params:
+  - name: lowerVersion
+    default: "2.3"
+    description: The version of the initial install
+    type: string
+  - name: higherVersion
+    default: "2.4"
+    description: The version to which to up.
+    type: string
+  - name: repo
+    default: DOWNSTREAM
+    description: UPSTREAM or DOWNSTREAM
+    type: string
+  - name: tag
+    default: pipelineTest
+    description: Image tag for the custom catalog
+    type: string
+  - name: destinationRepo
+    default: quay.io/cameronmwall/catalog-rep
+    description: The quay repo where the created catalog is placed
+    type: string
+  - name: token
+    default: default
+    description: Quay access token
+    type: string
+  steps:
+  - args:
+    - |-
+      #!/bin/bash
+      set -e
+      yum install jq -y
+      podman login quay.io
+      ./bundle-build.sh -l $(inputs.params.lowerVersion) -h $(inputs.params.higherVersion) -r $(inputs.params.repo) -t $(inputs.params.tag) -n $(inputs.params.destinationRepo) -k $(inputs.params.token)
+
+    command:
+    - /bin/bash
+    - -c
+    image: registry.redhat.io/rhel8/podman:latest
+    name: apply
+    resources: {}
+    workingDir: /workspace/source
+    securityContext:
+      privileged: true 
+  workspaces:
+  - name: source

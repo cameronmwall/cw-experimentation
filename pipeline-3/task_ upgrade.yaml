@@ -1,0 +1,59 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: upgrade
+  namespace: default
+spec:
+  params:
+  - name: higherVersion
+    default: "2.4"
+    description: The version to which to up.
+    type: string
+  steps:
+  - args:
+    - |-
+      #!/bin/bash
+      set -e
+      channel="release-"$(inputs.params.higherVersion)
+      oc patch sub multicluster-hub-operator-subscription --type=merge -p '{"spec":{"channel":"'$channel'"}}'
+      count=0
+      while :
+      do
+          if oc get csv advanced-cluster-management.v2.4.0 ; then
+            break
+          else
+            if [ $count -gt 20 ]; then
+              echo "CSV not created in  time"
+              exit 1
+            else
+              sleep 5
+              count=$(( $count + 1 ))
+            fi
+          fi
+        done
+      
+      count=0
+      while :
+      do  
+          status=$(oc get csv advanced-cluster-management.v2.4.0 -o jsonpath='{.status.phase}')
+          if [ $status=="Succeeded" ]; then
+              break
+          else
+              if [ $count -gt 120 ]; then
+                  echo "CSV not created in  time"
+                  exit 1
+              else
+                  sleep 5
+                  count=$(( $count + 1 ))
+              fi
+          fi
+      done
+    command:
+    - /bin/bash
+    - -c
+    image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+    name: apply
+    resources: {}
+    workingDir: /workspace/source
+  workspaces:
+  - name: source
