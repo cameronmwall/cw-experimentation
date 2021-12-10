@@ -3,12 +3,12 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
   name: multiclusterhub-catalog
-  namespace: default
+  namespace: cam-test
 spec:
   displayName: MultiCluster Hub
   publisher: Red Hat
   sourceType: grpc
-  image: quay.io/cameronmwall/catalog-rep:downstream-n
+  image: ""
   updateStrategy:
     registryPoll:
       interval: 10m

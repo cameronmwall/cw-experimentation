@@ -5,8 +5,8 @@ kind: Subscription
 metadata:
   name: multicluster-hub-operator-subscription
 spec:
-  channel: release-2.3
+  channel: ""
   installPlanApproval: Automatic
   name: advanced-cluster-management
   source: multiclusterhub-catalog
-  sourceNamespace: default
+  sourceNamespace: cam-test
