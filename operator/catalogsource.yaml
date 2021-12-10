@@ -3,7 +3,7 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
   name: multiclusterhub-catalog
-  namespace: cam-test
+  namespace: default
 spec:
   displayName: MultiCluster Hub
   publisher: Red Hat
