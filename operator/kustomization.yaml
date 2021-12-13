@@ -1,4 +1,4 @@
-namespace: open-cluster-management
+namespace: pipeline-test
 
 resources:
 - catalogsource.yaml

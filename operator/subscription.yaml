@@ -9,4 +9,4 @@ spec:
   installPlanApproval: Automatic
   name: advanced-cluster-management
   source: multiclusterhub-catalog
-  sourceNamespace: open-cluster-management
+  sourceNamespace: pipeline-test
