@@ -1,4 +1,4 @@
-namespace: cam-test
+namespace: open-cluster-management
 
 resources:
 - catalogsource.yaml
