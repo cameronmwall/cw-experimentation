@@ -1,0 +1,27 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: upgrade-2-3-2-4
+  namespace: default
+spec:
+  pipelineRef:
+    name: install-upgrade
+  serviceAccountName: pipeline
+  params:
+  - name: lowerVersion
+    value: "2.3"
+  - name: higherVersion
+    value: "2.4"
+  - name: repo
+    value: "DOWNSTREAM"
+  - name: tag
+    value: "pipelineTest"
+  - name: destinationRepo
+    value: "quay.io/cameronmwall/catalog-rep"
+  - name: token
+    value: "ll2MQDR3d64G4Jd2pSDH0vGMiOEB8JIwY8KPn0Jk"
+  timeout: 1h0m0s
+  workspaces:
+    - name: shared-workspace
+      persistentVolumeClaim:
+        claimName: upgrade-sample

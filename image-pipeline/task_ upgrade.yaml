@@ -1,39 +1,32 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: initial-install
+  name: upgrade
   namespace: default
 spec:
   params:
-  - name: lowerVersion
-    default: "2.3"
-    description: The version of the initial install
-    type: string
-  - name: tag
-    default: pipelineTest
-    description: Image tag for the custom catalog
-    type: string
-  - name: destinationRepo
-    default: quay.io/cameronmwall/catalog-rep
-    description: The quay repo where the created catalog is placed
+  - name: higherVersion
+    default: "2.4"
+    description: The version to which to up.
     type: string
   steps:
   - args:
     - |-
       #!/bin/bash
       set -e
-      image=$(inputs.params.destinationRepo):$(inputs.params.tag)
-      channel="release-"$(inputs.params.lowerVersion)
-      oc apply -k operator
-      oc patch catalogsource multiclusterhub-catalog --type=merge -p '{"spec":{"image":"'$image'"}}'
+
+      oc project pipeline-test
+      channel="release-"$(inputs.params.higherVersion)
+      desiredVersion=$(inputs.params.higherVersion)".0"
+      desiredCSV="advanced-cluster-management.v"$(inputs.params.higherVersion)".0"
       oc patch sub multicluster-hub-operator-subscription --type=merge -p '{"spec":{"channel":"'$channel'"}}'
       count=0
       while :
       do
-          if oc get csv advanced-cluster-management.v2.3.0 ; then
+          if oc get csv $desiredCSV ; then
             break
           else
-            if [ $count -gt 10 ]; then
+            if [ $count -gt 20 ]; then
               echo "CSV not created in  time"
               exit 1
             else
@@ -46,8 +39,8 @@ spec:
       count=0
       while :
       do  
-          status=$(oc get csv advanced-cluster-management.v2.3.0 -o jsonpath='{.status.phase}')
-          if [ $status=="Succeeded" ]; then
+          version=$(oc get mch multiclusterhub -o jsonpath='{.status.currentVersion}')
+          if [ $version == $desiredVersion ]; then
               break
           else
               if [ $count -gt 120 ]; then
@@ -59,32 +52,16 @@ spec:
               fi
           fi
       done
-      oc apply -f mch.yml
-      count=0
-      while :
-      do
-          if oc get mch multiclusterhub ; then
-            break
-          else
-            if [ $count -gt 10 ]; then
-              echo "MCH not created in  time"
-              exit 1
-            else
-              sleep 5
-              count=$(( $count + 1 ))
-            fi
-          fi
-        done
-      
+
       count=0
       while :
       do  
           status=$(oc get mch multiclusterhub -o jsonpath='{.status.phase}')
-          if [ $status=="Running" ]; then
+          if [ $status == "Running" ]; then
               break
           else
               if [ $count -gt 120 ]; then
-                  echo "MCH not created in  time"
+                  echo "MCH not updated in  time"
                   exit 1
               else
                   sleep 5
